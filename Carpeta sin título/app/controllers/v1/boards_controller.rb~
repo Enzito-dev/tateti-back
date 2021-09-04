@@ -1,0 +1,73 @@
+class V1::BoardsController < ApplicationController
+skip_before_action :verify_authenticity_token, :only => [:create]
+
+def index
+  render(json: Board.all)
+ end
+
+def create
+path = "/v1/boards"
+board = Board.new(board_params)
+msg , status = if board.save
+	[{result: "todo salio bien"}, 200]
+	else
+	[message_error(path, board.errors.full_messages ), 400]	
+	end
+for x in [1,2,3,4,5,6,7,8,9] do
+cell = Cell.new(position: x, board_id: board.id)
+msg , status = if cell.save
+	[{id: board.id }, 200]
+	else
+	[message_error(path, cell.errors.full_messages ), 400]	
+	end
+end
+render(json: msg, status: status)
+end
+
+
+def board_params
+params.require(:board).permit(:player_one_id, :player_two_id)
+end
+
+
+def victory_conditions (board_id, user_id, board)
+p1 = Cell.marked.user_id(user_id).find_by(board_id: board_id, position: 1)
+p2 = Cell.marked.user_id(user_id).find_by(board_id: board_id, position: 2)
+p3 = Cell.marked.user_id(user_id).find_by(board_id: board_id, position: 3)
+p4 = Cell.marked.user_id(user_id).find_by(board_id: board_id, position: 4)
+p5 = Cell.marked.user_id(user_id).find_by(board_id: board_id, position: 5)
+p6 = Cell.marked.user_id(user_id).find_by(board_id: board_id, position: 6)
+p7 = Cell.marked.user_id(user_id).find_by(board_id: board_id, position: 7)
+p8 = Cell.marked.user_id(user_id).find_by(board_id: board_id, position: 8)
+p9 = Cell.marked.user_id(user_id).find_by(board_id: board_id, position: 9)
+if !(p1.blank? && p2.blank? && p3.blank?) || !(p4.blank? && p5.blank? && p6.blank?) || !(p7.blank? && p8.blank? && p9.blank?) || !(p1.blank? && p4.blank? && p7.blank?) || !(p2.blank? && p5.blank? && p8.blank?) || !(p3.blank? && p6.blank? && p9.blank?) || !(p1.blank? && p5.blank? && p9.blank?) || !(p3.blank? && p5.blank? && p7.blank?)      
+board.result = "winner is user id: " + user_id
+msg , status = if board.save
+	[{result: board.result }, 200]
+	else
+	[message_error(path, board.errors.full_messages ), 400]	
+	end
+render(json: msg, status: status)
+end
+end
+
+def draw(board_id, user_id)
+board = board.find_by(id: board_id)
+	if board.counter_turn == 9 &&  !Board.victory_conditions(board_id, user_id, board) 
+	board.result = "draw"
+	msg , status = if board.save
+		[{result: board.result }, 200]
+		else
+		[message_error(path, board.errors.full_messages ), 400]	
+		end	
+	else
+		Board.victory_conditions(board_id, user_id, board) 	
+	end
+render(json: msg, status: status)
+end
+
+def message_error (path, message)
+msg = {message: [{path: path, message: message }]}
+end
+
+end

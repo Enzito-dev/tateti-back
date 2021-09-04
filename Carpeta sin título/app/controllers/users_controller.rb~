@@ -1,0 +1,19 @@
+class UsersController < ApplicationController
+def index
+  render: (json: User.all)
+ end
+
+def register
+user = User.new(user_params)
+puts "si registro usuarios"
+#if user.save
+#render: (json: user, status: 200)
+#else
+#render: (json: user.errors_full_messages , status: 400)
+end
+
+def user_params
+params.require(:user).permit(:username, :password, :nickname)
+end
+ 
+end

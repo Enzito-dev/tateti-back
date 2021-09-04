@@ -1,0 +1,17 @@
+class Cell < ApplicationRecord
+
+belongs_to :board
+
+validates :turn, :position, length: {maximum: 1}
+
+
+def marked?
+	marked == true
+end
+
+def player?(user)
+	user_id == user
+end
+
+
+end

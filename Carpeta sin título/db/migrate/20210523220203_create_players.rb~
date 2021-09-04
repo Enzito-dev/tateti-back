@@ -1,0 +1,10 @@
+class CreatePlayers < ActiveRecord::Migration[6.1]
+  def change
+    create_table :players do |t|
+      t.reference :user
+      t.reference :board
+
+      t.timestamps
+    end
+  end
+end
